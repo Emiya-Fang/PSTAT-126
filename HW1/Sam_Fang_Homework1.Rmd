@@ -1,0 +1,121 @@
+---
+title: "Homework Assignment 1"
+author: "Sam Fang (8114613)"
+date: "01/30/2021"
+output:
+  pdf_document: 
+    latex_engine : xelatex 
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+
+```{r setup, echo=FALSE}
+library(knitr)
+# set global chunk options: images will be 7x5 inches
+
+knitr::opts_chunk$set(fig.width=7, fig.height=5)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
+options(digits = 4)
+
+## indents are for indenting r code as formatted text
+## They may need to be adjusted depending on your OS
+# if your output looks odd, increase or decrease indent
+indent1 = '    '
+indent2 = '        '
+indent3 = '            '
+```
+
+Q1:
+(a) The predictor variable is the population. The response variable is the number of confirmed COVID-19 cases.
+
+(b) Since $\hat{\beta_1} = \frac{{\sum\limits_{i = 1}^n {({x_i} - \bar x)({y_i}}  - \bar y{)}}}{{\sum\limits_{i = 1}^n {{{({x_i} - \bar x)}^2}} }}$ and $\hat{\beta_0} = \bar y - \hat{\beta_1}*\bar x$,we can calculate that $\hat{\beta_0}$ = 2.85395 and $\hat{\beta_1}$= 0.07236.
+
+```{R}
+cov.data <- data.frame(row.names = c("San Bernardino County", "Riverside County",
+"Orange County",
+"San Diego County",
+"Santa Clara County",
+"Kern County",
+"Sacramento County",
+"Fresno County",
+"Alameda County"))
+cov.data$population <- c(2149, 2411, 3168, 3316, 1927, 887, 1525, 985, 1657)
+cov.data$confirmed <- c(251, 239, 223, 212, 93, 85, 79, 81, 67)
+x <- cov.data$population
+y <- cov.data$confirmed
+
+betaone <- ((x[1]-mean(x))*(y[1]-mean(y))+(x[2]-mean(x))*(y[2]-mean(y))+(x[3]-mean(x))*(y[3]-mean(y))+(x[4]-mean(x))*(y[4]-mean(y))+(x[5]-mean(x))*(y[5]-mean(y))+(x[6]-mean(x))*(y[6]-mean(y))+(x[7]-mean(x))*(y[7]-mean(y))+(x[8]-mean(x))*(y[8]-mean(y))+(x[9]-mean(x))*(y[9]-mean(y)))/((x[1]-mean(x))^2+(x[2]-mean(x))^2+(x[3]-mean(x))^2+(x[4]-mean(x))^2+(x[5]-mean(x))^2+(x[6]-mean(x))^2+(x[7]-mean(x))^2+(x[8]-mean(x))^2+(x[9]-mean(x))^2)
+
+betazero <- mean(y)-betaone*mean(x)
+
+betaone
+betazero
+```
+
+(c)$\hat{\beta_1}$ is the average change of people confirmed for every 1000 increase in population. $\hat{\beta_0}$ is the number of confirmed people when population is zero.
+
+(d) Simple linear regression model: y = 2.854 + 0.07236*x
+
+(e) When x = 1000000, y = 72364
+```{R}
+predicted <- betazero+ 1000000 *betaone
+predicted
+
+```
+Q2
+```{R}
+trees
+```
+(a) There are 31 rows and 3 columns in the dataset "trees". The variable names are "Girth", "Height" and "Volume".
+
+(b) Here is the scatterplot:
+```{R}
+pairs(formula = log(Volume)~log(Girth)+log(Height),data = trees)
+```
+
+(c) 
+```{R}
+cor(log(trees), method = c("pearson", "kendall", "spearman"))
+```
+
+(d) No, there are no missing values.
+```{R}
+is.na(cor(log(trees)))
+```
+
+(e)
+```{R}
+mod <- lm(log(Volume)~log(Girth)+log(Height),data=trees)
+summary(mod)
+```
+
+(f)
+```{R}
+mod$coefficients
+X=model.matrix(mod)
+Y=log(trees)$Volume
+(beta_hat=solve(t(X)%*%X)%*%t(X)%*%Y)
+```
+These two results are the same above.
+
+(g)
+```{R}
+hat_y <- X%*%beta_hat
+head(hat_y)
+head(mod$residuals)
+head((t(mod$residuals) %*% mod$residuals/28))
+```
+
+Q3 The procedure is below:
+$${\rm{SS}}R = {\sum\limits_{i = 1}^n {({y_i} - {\beta _0} - {\beta _1}{x_i})} ^2}$$
+
+The derivative of SSR with respect to $\beta_0$ is $$\frac{d}{{d{{\hat \beta }_0}}}\sum\limits_{i = 1}^n {{{({y_i} - {\beta _0} - {\beta _1}{x_i})}^2}}  =  - 2\sum\limits_{i = 1}^n {({y_i} - {\beta _0} - {\beta _1}{x_i})}  =   - 2\sum\limits_{i = 1}^n {{y_i} + 2n{\beta _0} + 2{\beta _1}\sum\limits_{i = 1}^n {{x_i}} }  =  - 2n\bar y + 2n{\hat \beta _0} + 2n{\hat \beta _1}\bar x $$
+Set this derivative = 0, we can get $$ - 2n\bar y + 2n{\hat \beta _0} + 2n{\hat \beta _1}\bar x=0. $$ 
+So $$\hat{\beta_0} = \bar y - \hat{\beta_1}*\bar x$$
+The derivative of SSR with respect to $\beta_1$ is $$\frac{d}{{d{{\hat \beta }_1}}}\sum\limits_{i = 1}^n {{{({y_i} - {\beta _0} - {\beta _1}{x_i})}^2}} =  - 2{x_i}\sum\limits_{i = 1}^n {({y_i} - } {\hat \beta _0} - {\hat \beta _1}{x_i}) =  - 2\sum\limits_{i = 1}^n {{x_i}{y_i} + 2{{\hat \beta }_0}\sum\limits_{i = 1}^n {{x_i}} }  + 2{\hat \beta _1}\sum\limits_{i = 1}^n {{x_i}^2}  $$
+Set this derivative = 0, we can get $$ - 2\sum\limits_{i = 1}^n {{x_i}{y_i} + 2{{\hat \beta }_0}\sum\limits_{i = 1}^n {{x_i}} }  + 2{\hat \beta _1}\sum\limits_{i = 1}^n {{x_i}^2}  = 0.$$ 
+So $$ - \sum\limits_{i = 1}^n {{x_i}{y_i} + (\bar y - \hat {{\beta _1}}\bar x)\sum\limits_{i = 1}^n {{x_i}} }  + {\hat \beta _1}\sum\limits_{i = 1}^n {{x_i}^2}  = 0$$
+$${\hat \beta _1} = \frac{{{\rm{\bar y}}\sum\limits_{i = 1}^n {{x_i}}  - \sum\limits_{i = 1}^n {{x_i}{y_i}} }}{{\bar x\sum\limits_{i = 1}^n {{x_i} - \sum\limits_{i = 1}^n {x_i^2} } }}  = \frac{{n\bar x{\rm{\bar y}} - \sum\limits_{i = 1}^n {{x_i}{y_i}} }}{{n{{\bar x}^2} - \sum\limits_{i = 1}^n {x_i^2} }} = \frac{{\sum\limits_{i = 1}^n {({x_i} - \bar x)({y_i}}  - \bar y{)}}}{{\sum\limits_{i = 1}^n {{{({x_i} - \bar x)}^2}} }}$$
+Proved
